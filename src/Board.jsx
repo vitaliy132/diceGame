@@ -1,11 +1,9 @@
-import React from "react";
-
 const Board = () => {
   return (
     <div
       style={{
         position: "absolute",
-        top: "160px", // Moved higher to not be right on the dice
+        top: "160px",
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 10,
