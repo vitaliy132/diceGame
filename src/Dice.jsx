@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import RollsBar from "./RollsBar";
 
-// 3D Dice component with proper face transforms
 const Dice3D = ({ value, rolling }) => {
   const getTransform = (diceValue) => {
     switch (diceValue) {
@@ -47,7 +46,6 @@ const Dice3D = ({ value, rolling }) => {
         duration: 0.8,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}>
-      {/* Front face (1) */}
       <div
         style={{
           position: "absolute",
@@ -72,8 +70,6 @@ const Dice3D = ({ value, rolling }) => {
           }}
         />
       </div>
-
-      {/* Back face (6) */}
       <div
         style={{
           position: "absolute",
@@ -99,8 +95,6 @@ const Dice3D = ({ value, rolling }) => {
           }}
         />
       </div>
-
-      {/* Top face (2) */}
       <div
         style={{
           position: "absolute",
@@ -126,8 +120,6 @@ const Dice3D = ({ value, rolling }) => {
           }}
         />
       </div>
-
-      {/* Bottom face (5) */}
       <div
         style={{
           position: "absolute",
@@ -153,8 +145,6 @@ const Dice3D = ({ value, rolling }) => {
           }}
         />
       </div>
-
-      {/* Right face (3) */}
       <div
         style={{
           position: "absolute",
@@ -180,8 +170,6 @@ const Dice3D = ({ value, rolling }) => {
           }}
         />
       </div>
-
-      {/* Left face (4) */}
       <div
         style={{
           position: "absolute",
@@ -216,25 +204,21 @@ function Dice({ buttonClick, dicePhoto }) {
   const [rolling, setRolling] = useState(false);
   const [rollingFace, setRollingFace] = useState(1);
   const [rolls, setRolls] = useState(10);
-  const refillQueue = useRef([]); // stores timeouts for refills
-  const [nextRefill, setNextRefill] = useState(null); // timestamp for next refill
+  const refillQueue = useRef([]);
+  const [nextRefill, setNextRefill] = useState(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [furthestDiceValue, setFurthestDiceValue] = useState(1);
 
-  // Number of border boxes (top row, right col, bottom row, left col, minus corners counted twice)
   const BORDER_BOX_COUNT = 20;
   const [highlightedBorderIndex, setHighlightedBorderIndex] = useState(18);
 
-  // Move the border forward by the dice value on every roll, wrapping around
   useEffect(() => {
     setHighlightedBorderIndex((prev) => {
       let next = (prev + dice) % BORDER_BOX_COUNT;
       return next;
     });
-    // eslint-disable-next-line
   }, [dice]);
 
-  // Helper to get a random face different from the current one
   const getRandomFace = (exclude) => {
     let face;
     do {
@@ -243,9 +227,7 @@ function Dice({ buttonClick, dicePhoto }) {
     return face;
   };
 
-  // Refill logic
   useEffect(() => {
-    // Clean up on unmount
     return () => {
       refillQueue.current.forEach(clearTimeout);
     };
@@ -254,7 +236,6 @@ function Dice({ buttonClick, dicePhoto }) {
   const handleRefill = () => {
     setRolls((prev) => (prev < 10 ? prev + 1 : prev));
     refillQueue.current.shift();
-    // Update nextRefill to the next timeout if any
     if (refillQueue.current.length > 0) {
       setNextRefill(
         Date.now() +
@@ -269,32 +250,20 @@ function Dice({ buttonClick, dicePhoto }) {
   };
 
   const rollDice = () => {
-    // Prevent multiple rolls
     if (rolling || rolls <= 0) {
       return;
     }
-
-    // Immediately set rolling to true to prevent multiple clicks
     setRolling(true);
-
-    // Generate random number 1-10, if 7-10, reroll
     const random = Math.floor(Math.random() * 10);
     let finalFace;
-
     if (random >= 1 && random <= 6) {
       finalFace = random;
     } else {
-      // Reroll for valid face
       finalFace = Math.floor(Math.random() * 6) + 1;
     }
-
-    // Set final result immediately and stop rolling
     setDice(finalFace);
     setRolling(false);
-
-    // Update rolls count and schedule refill after setting the result
     setRolls((prev) => prev - 1);
-    // Schedule a refill in 30 minutes
     const refillTimeout = setTimeout(handleRefill, 1800000);
     refillQueue.current.push(refillTimeout);
     if (rolls === 10) {
@@ -302,7 +271,6 @@ function Dice({ buttonClick, dicePhoto }) {
     }
   };
 
-  // Timer effect
   useEffect(() => {
     if (rolls === 10) {
       setSecondsLeft(0);
@@ -318,7 +286,6 @@ function Dice({ buttonClick, dicePhoto }) {
     return () => clearInterval(interval);
   }, [nextRefill, rolls]);
 
-  // Helper to format seconds as HH:MM:SS
   const formatTime = (secs) => {
     const h = Math.floor(secs / 3600)
       .toString()
@@ -382,8 +349,6 @@ function Dice({ buttonClick, dicePhoto }) {
         />
       </div>
       <RollsBar rolls={rolls} secondsLeft={secondsLeft} formatTime={formatTime} />
-
-      {/* Centered flag box grid and dice */}
       <div
         style={{
           display: "flex",
@@ -406,12 +371,9 @@ function Dice({ buttonClick, dicePhoto }) {
           {Array.from({ length: 36 }).map((_, i) => {
             const row = Math.floor(i / 6);
             const col = i % 6;
-            // Border cells: first/last row or first/last column
             const isBorder = row === 0 || row === 5 || col === 0 || col === 5;
-            // Center 2x2 area for dice
             const isDiceCenter = (row === 2 || row === 3) && (col === 2 || col === 3);
             if (row === 2 && col === 2) {
-              // Only render dice once in the top-left of the 2x2 center
               return (
                 <div
                   key="dice-center"
@@ -449,16 +411,14 @@ function Dice({ buttonClick, dicePhoto }) {
               );
             }
             if (isDiceCenter && !(row === 2 && col === 2)) {
-              // Fill the rest of the 2x2 center with empty cells
               return null;
             }
             if (isBorder) {
-              // Calculate the border box's sequential index (top row left to right, right col top to bottom, bottom row right to left, left col bottom to top)
               let borderIndex = -1;
-              if (row === 0) borderIndex = col; // top row: 0-5
-              else if (col === 5) borderIndex = 6 + (row - 1); // right col: 6-10
-              else if (row === 5) borderIndex = 16 - col; // bottom row: 11-16
-              else if (col === 0) borderIndex = 16 + (5 - row); // left col: 17-20
+              if (row === 0) borderIndex = col;
+              else if (col === 5) borderIndex = 6 + (row - 1);
+              else if (row === 5) borderIndex = 16 - col;
+              else if (col === 0) borderIndex = 16 + (5 - row);
               const isHighlighted = borderIndex === highlightedBorderIndex;
               return (
                 <div
@@ -486,12 +446,10 @@ function Dice({ buttonClick, dicePhoto }) {
                 </div>
               );
             }
-            // Empty cell
             return <div key={`empty-${row}-${col}`} style={{ width: "56px", height: "56px" }} />;
           })}
         </div>
       </div>
-
       <div
         style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <div

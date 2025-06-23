@@ -12,7 +12,7 @@ const formatTime = (secs) => {
   return `${h}:${m}:${s}`;
 };
 
-export default function RollsBar({ rolls, secondsLeft, formatTime }) {
+export default function RollsBar({ rolls, secondsLeft }) {
   return (
     <>
       <div style={{ width: 346, margin: "0 auto 16px auto" }}>
